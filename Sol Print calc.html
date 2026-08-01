@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sol Print — Калькулятор</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+    <style>
+        :root {
+            --primary: #e63946;
+            --accent: #c1121f;
+            --bg: #ffffff;
+            --dark: #1a1a1a;
+            --light-gray: #f8f9fa;
+            --border: #dee2e6;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Calibri', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-weight: 400;
+            background: var(--bg);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+        .calc-container {
+            background: #fff;
+            padding: 30px;
+            width: 100%;
+            max-width: 620px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-top: 6px solid var(--primary);
+        }
+        .logo-box {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo-box h1 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 34px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        .logo-box h1 span {
+            color: var(--dark);
+            font-weight: 300;
+        }
+        .logo-box .subtitle {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        select,
+        input[type="number"] {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
+            font-weight: 400;
+            font-size: 15px;
+            background: #fff;
+            transition: 0.2s;
+            color: var(--dark);
+        }
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        .row .form-group {
+            flex: 1;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .options-box {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid #eee;
+            margin: 5px 0 15px 0;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 400;
+        }
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+            margin: 0;
+        }
+        .checkbox-row label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--dark);
+        }
+        .sub-option {
+            margin-left: 28px;
+            margin-top: 6px;
+            margin-bottom: 10px;
+        }
+        .sub-option select,
+        .sub-option input {
+            width: 100%;
+            padding: 9px 12px;
+            font-size: 14px;
+            font-weight: 400;
+        }
+        .manual-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .manual-input input {
+            width: 80px;
+            text-align: center;
+        }
+        .manual-input span {
+            font-size: 13px;
+            color: #666;
+            font-weight: 400;
+        }
+        .result-panel {
+            margin-top: 20px;
+            padding: 25px;
+            background: var(--dark);
+            color: #fff;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .result-panel .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #ccc;
+            font-weight: 400;
+        }
+        #totalPrice {
+            font-size: 42px;
+            font-weight: 700;
+            display: block;
+            color: var(--primary);
+            margin: 5px 0;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn-save {
+            width: 85%;
+            padding: 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
+            font-weight: 700;
+            font-size: 17px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-save:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(230, 57, 70, 0.35);
+        }
+        .btn-save:active {
+            transform: translateY(0);
+        }
+        .hidden {
+            display: none !important;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calc-container">
+        <div class="logo-box">
+            <h1>SOL <span>PRINT</span></h1>
+            <p class="subtitle">Широкоформатная печать — Прайс для РА</p>
+        </div>
+
+        <div class="form-group">
+            <label>Материал</label>
+            <select id="material" onchange="updateUI()">
+                <optgroup label="Баннеры">
+                    <option value="250" data-cat="banner">Баннер 300 г. — 250 р./м²</option>
+                    <option value="350" data-cat="banner">Баннер 440 г. — 350 р./м²</option>
+                    <option value="410" data-cat="banner">Баннер 510 г. Литой — 410 р./м²</option>
+                    <option value="400" data-cat="banner">Баннерная сетка — 400 р./м²</option>
+                </optgroup>
+                <optgroup label="Плёнки">
+                    <option value="420" data-cat="sticker">Пленка мат/глянец — 420 р./м²</option>
+                    <option value="420" data-cat="sticker">Пленка прозрачная мат/глянец — 420 р./м²</option>
+                    <option value="450" data-cat="sticker">Пленка перфорированная — 450 р./м²</option>
+                    <option value="1000" data-cat="sticker">Пленка зеркало — 1000 р./м²</option>
+                    <option value="1100" data-cat="sticker">Пленка + ламинация — 1100 р./м²</option>
+                </optgroup>
+                <optgroup label="Прочее">
+                    <option value="2100" data-cat="other">Холст натуральный — 2100 р./м²</option>
+                    <option value="500" data-cat="other">Бэклит 180 мкм — 500 р./м²</option>
+                    <option value="250" data-cat="other">Бумага Blueback (постерная) — 250 р./м²</option>
+                    <option value="400" data-cat="other">Постерная бумага белая — 400 р./м²</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="row">
+            <div class="form-group">
+                <label>Ширина (мм)</label>
+                <input type="number" id="width" value="1000" min="1" oninput="calculate()">
+            </div>
+            <div class="form-group">
+                <label>Высота (мм)</label>
+                <input type="number" id="height" value="1000" min="1" oninput="calculate()">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Количество (шт.)</label>
+            <input type="number" id="quantity" value="1" min="1" oninput="calculate()">
+        </div>
+
+        <div class="options-box">
+            <div class="section-title">Дополнительные услуги</div>
+
+            <div id="prokleikaBlock">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="prokleika" onchange="calculate()">
+                    <label for="prokleika">Проклейка — 60 р./м.п.</label>
+                </div>
+            </div>
+
+            <div id="luversBlock">
+                <div class="checkbox-row">
+                    <input type="checkbox" id="luversEnabled" onchange="toggleLuvers()">
+                    <label for="luversEnabled">Люверсы — 15 р./шт.</label>
+                </div>
+                <div id="luversOptions" class="sub-option hidden">
+                    <select id="lType" onchange="toggleManualLuvers()">
+                        <option value="corners">Только по углам (4 шт.)</option>
+                        <option value="topbottom">Только сверху и снизу</option>
+                        <option value="sides">Только по бокам</option>
+                        <option value="step30">Шаг 30 см</option>
+                        <option value="step40">Шаг 40 см</option>
+                        <option value="step50">Шаг 50 см</option>
+                        <option value="manual">Ввести количество вручную</option>
+                    </select>
+                    <div id="manualLuversBlock" class="manual-input hidden">
+                        <input type="number" id="manualLuvers" value="0" min="0" oninput="calculate()">
+                        <span>шт.</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="checkbox-row">
+                <input type="checkbox" id="rezka" onchange="calculate()">
+                <label for="rezka">Резка — 20 р./м.п.</label>
+            </div>
+        </div>
+
+        <div class="result-panel">
+            <span class="label">Итого к оплате</span>
+            <span id="totalPrice">0 р.</span>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn-save" onclick="saveToPDF()">Сохранить расчёт в PDF</button>
+        </div>
+    </div>
+
+    <script>
+        // Глобальная переменная для хранения загруженного шрифта
+        let fontBase64 = null;
+
+        // Загружаем шрифт при старте
+        async function loadFont() {
+            try {
+                const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf';
+                const response = await fetch(fontUrl);
+                const arrayBuffer = await response.arrayBuffer();
+                const bytes = new Uint8Array(arrayBuffer);
+                let binary = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                fontBase64 = btoa(binary);
+                console.log('Шрифт загружен успешно');
+            } catch (error) {
+                console.error('Ошибка загрузки шрифта:', error);
+            }
+        }
+
+        window.onload = function() {
+            loadFont();
+            updateUI();
+            calculate();
+        };
+
+        function updateUI() {
+            const mat = document.getElementById('material');
+            const cat = mat.options[mat.selectedIndex].getAttribute('data-cat');
+            const prokBlock = document.getElementById('prokleikaBlock');
+            const luvBlock = document.getElementById('luversBlock');
+
+            if (cat === 'banner') {
+                prokBlock.classList.remove('hidden');
+                luvBlock.classList.remove('hidden');
+            } else {
+                prokBlock.classList.add('hidden');
+                luvBlock.classList.add('hidden');
+                document.getElementById('prokleika').checked = false;
+                document.getElementById('luversEnabled').checked = false;
+                document.getElementById('luversOptions').classList.add('hidden');
+                document.getElementById('lType').value = 'corners';
+                document.getElementById('manualLuversBlock').classList.add('hidden');
+            }
+            calculate();
+        }
+
+        function toggleLuvers() {
+            const enabled = document.getElementById('luversEnabled').checked;
+            const opts = document.getElementById('luversOptions');
+            if (enabled) {
+                opts.classList.remove('hidden');
+                toggleManualLuvers();
+            } else {
+                opts.classList.add('hidden');
+                document.getElementById('manualLuversBlock').classList.add('hidden');
+            }
+            calculate();
+        }
+
+        function toggleManualLuvers() {
+            const lType = document.getElementById('lType').value;
+            const manualBlock = document.getElementById('manualLuversBlock');
+            if (lType === 'manual') {
+                manualBlock.classList.remove('hidden');
+            } else {
+                manualBlock.classList.add('hidden');
+            }
+            calculate();
+        }
+
+        function calcLuversOnSides(w, h, side) {
+            const step = 300;
+            if (side === 'horizontal') {
+                const topCount = Math.floor(w / step) + 1;
+                return topCount * 2;
+            } else {
+                const sideCount = Math.floor(h / step) + 1;
+                return sideCount * 2;
+            }
+        }
+
+        function calcLuversPerimeter(w, h, stepMm) {
+            const topBottom = (Math.floor(w / stepMm) + 1) * 2;
+            const sides = (Math.floor(h / stepMm) + 1) * 2;
+            return topBottom + sides;
+        }
+
+        function calculateLuversCount(w, h) {
+            const enabled = document.getElementById('luversEnabled').checked;
+            if (!enabled) return 0;
+
+            const lType = document.getElementById('lType').value;
+
+            switch (lType) {
+                case 'corners':
+                    return 4;
+                case 'topbottom':
+                    return calcLuversOnSides(w, h, 'horizontal');
+                case 'sides':
+                    return calcLuversOnSides(w, h, 'vertical');
+                case 'step30':
+                    return calcLuversPerimeter(w, h, 300);
+                case 'step40':
+                    return calcLuversPerimeter(w, h, 400);
+                case 'step50':
+                    return calcLuversPerimeter(w, h, 500);
+                case 'manual':
+                    return parseInt(document.getElementById('manualLuvers').value) || 0;
+                default:
+                    return 0;
+            }
+        }
+
+        function calculate() {
+            const mat = document.getElementById('material');
+            const priceM2 = parseFloat(mat.value) || 0;
+            const w = parseFloat(document.getElementById('width').value) || 0;
+            const h = parseFloat(document.getElementById('height').value) || 0;
+            const qty = parseInt(document.getElementById('quantity').value) || 1;
+
+            const areaM2 = (w / 1000) * (h / 1000);
+            const perimeterM = ((w + h) * 2) / 1000;
+
+            let totalOne = areaM2 * priceM2;
+
+            const prokChecked = document.getElementById('prokleika').checked;
+            if (prokChecked) totalOne += perimeterM * 60;
+
+            const rezChecked = document.getElementById('rezka').checked;
+            if (rezChecked) totalOne += perimeterM * 20;
+
+            const lc = calculateLuversCount(w, h);
+            totalOne += lc * 15;
+
+            const final = Math.round(totalOne * qty);
+
+            document.getElementById('totalPrice').innerText = final.toLocaleString('ru-RU') + ' р.';
+
+            return {
+                matName: mat.options[mat.selectedIndex].text,
+                priceM2,
+                w,
+                h,
+                qty,
+                areaM2: areaM2.toFixed(3),
+                perimeterM: perimeterM.toFixed(2),
+                prokChecked,
+                rezChecked,
+                luversEnabled: document.getElementById('luversEnabled').checked,
+                luversCount: lc,
+                luversType: document.getElementById('lType').value,
+                final,
+            };
+        }
+
+        async function saveToPDF() {
+            const data = calculate();
+
+            if (!fontBase64) {
+                alert('Шрифт ещё загружается, попробуйте через секунду');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            // Добавляем шрифт
+            doc.addFileToVFS('Roboto-Regular.ttf', fontBase64);
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+            doc.setFont('Roboto');
+
+            const left = 20;
+            let y = 20;
+
+            // Заголовок
+            doc.setFontSize(24);
+            doc.setTextColor(230, 57, 70);
+            doc.text('SOL PRINT', left, y);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Широкоформатная печать — Прайс для РА', left, y + 7);
+            y += 18;
+
+            // Линия
+            doc.setDrawColor(230, 57, 70);
+            doc.setLineWidth(0.5);
+            doc.line(left, y, 190, y);
+            y += 10;
+
+            // Данные
+            doc.setFontSize(12);
+            doc.setTextColor(50, 50, 50);
+
+            const addLine = (label, value) => {
+                doc.text(label + ':', left, y);
+                doc.text(value, left + 60, y);
+                y += 8;
+            };
+
+            addLine('Материал', data.matName);
+            addLine('Цена материала', data.priceM2 + ' р./м²');
+            addLine('Размер', data.w + ' × ' + data.h + ' мм');
+            addLine('Площадь', data.areaM2 + ' м²');
+            addLine('Периметр', data.perimeterM + ' м.п.');
+            addLine('Количество', data.qty + ' шт.');
+            y += 5;
+
+            // Доп. услуги
+            doc.setFontSize(13);
+            doc.text('Дополнительные услуги:', left, y);
+            y += 8;
+
+            doc.setFontSize(12);
+            doc.text('• Проклейка (60 р./м.п.): ' + (data.prokChecked ? 'Да' : 'Нет'), left + 5, y);
+            y += 7;
+
+            doc.text('• Резка (20 р./м.п.): ' + (data.rezChecked ? 'Да' : 'Нет'), left + 5, y);
+            y += 7;
+
+            if (data.luversEnabled) {
+                doc.text('• Люверсы (15 р./шт.): ' + data.luversCount + ' шт.', left + 5, y);
+            } else {
+                doc.text('• Люверсы: Нет', left + 5, y);
+            }
+            y += 12;
+
+            // Линия
+            doc.setDrawColor(230, 57, 70);
+            doc.line(left, y, 190, y);
+            y += 10;
+
+            // Итого
+            doc.setFontSize(20);
+            doc.setTextColor(200, 20, 30);
+            doc.text('ИТОГО: ' + data.final.toLocaleString('ru-RU') + ' РУБ.', left, y);
+            y += 15;
+
+            // Футер
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Сгенерировано Sol Print Online Calculator', left, 280);
+
+            const filename = `SolPrint_Расчёт_${data.w}x${data.h}_${new Date().toISOString().slice(0, 10)}.pdf`;
+            doc.save(filename);
+        }
+    </script>
+
+</body>
+</html>
