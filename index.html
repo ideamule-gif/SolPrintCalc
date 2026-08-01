@@ -583,15 +583,15 @@
         }
     </script>
 
-    <script>
+  <script>
     // Регистрация Service Worker
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/ideamule-gif/sw.js')
+        navigator.serviceWorker.register('sw.js')
             .then(registration => {
-                console.log('Service Worker зарегистрирован');
+                console.log('✅ Service Worker зарегистрирован');
             })
             .catch(error => {
-                console.log('Ошибка регистрации Service Worker:', error);
+                console.log('❌ Ошибка регистрации Service Worker:', error);
             });
     }
 </script>
