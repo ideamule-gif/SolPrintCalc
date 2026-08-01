@@ -1,9 +1,11 @@
 // sw.js — Service Worker для офлайн-режима
 const CACHE_NAME = 'sol-print-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  '/ideamule-gif/',
+  '/ideamule-gif/index.html',
+  '/ideamule-gif/manifest.json',
+  '/ideamule-gif/icon-192.png',
+  '/ideamule-gif/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
