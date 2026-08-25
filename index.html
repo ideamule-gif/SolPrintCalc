@@ -224,14 +224,39 @@
             border-top: 1px solid #eee;
             margin: 12px 0;
         }
+
+        /* ===== PWA — МАЛЕНЬКАЯ ССЫЛКА ВНИЗУ ===== */
+        .pwa-install {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .pwa-install a {
+            display: inline-block;
+            font-size: 12px;
+            color: #999;
+            text-decoration: none;
+            transition: 0.2s;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        .pwa-install a:hover {
+            color: var(--primary);
+            background: rgba(230, 57, 70, 0.08);
+        }
+        .pwa-install a.hidden {
+            display: none;
+        }
     </style>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖨️</text></svg>">
     <!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Sol Print">
-<meta name="theme-color" content="#e63946">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sol Print">
+    <meta name="theme-color" content="#e63946">
 </head>
 <body>
 
@@ -330,9 +355,43 @@
         <div class="btn-container">
             <button class="btn-save" onclick="saveToPDF()">Сохранить расчёт в PDF</button>
         </div>
+
+        <!-- ===== PWA — МАЛЕНЬКАЯ ССЫЛКА ВНИЗУ ===== -->
+        <div class="pwa-install">
+            <a id="pwaInstallLink" class="hidden" onclick="installPWA()">
+                📲 Установить как приложение
+            </a>
+        </div>
     </div>
 
     <script>
+        // ===== PWA УСТАНОВКА (маленькая ссылка внизу) =====
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwaInstallLink').classList.remove('hidden');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    if (result.outcome === 'accepted') {
+                        console.log('PWA установлено');
+                        document.getElementById('pwaInstallLink').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('pwaInstallLink').classList.add('hidden');
+        });
+
+        // ===== ОСНОВНОЙ КОД =====
         // Глобальная переменная для хранения загруженного шрифта
         let fontBase64 = null;
 
@@ -583,18 +642,18 @@
         }
     </script>
 
-  <script>
-    // Регистрация Service Worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/SolPrintCalc/sw.js')
-            .then(registration => {
-                console.log('✅ Service Worker зарегистрирован');
-            })
-            .catch(error => {
-                console.log('❌ Ошибка регистрации Service Worker:', error);
-            });
-    }
-</script>
-    
+    <script>
+        // Регистрация Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/SolPrintCalc/sw.js')
+                .then(registration => {
+                    console.log('✅ Service Worker зарегистрирован');
+                })
+                .catch(error => {
+                    console.log('❌ Ошибка регистрации Service Worker:', error);
+                });
+        }
+    </script>
+
 </body>
 </html>
