@@ -1,7 +1,7 @@
 {
-  "name": "Sol Print — Калькулятор",
-  "short_name": "Sol Print",
-  "description": "Калькулятор широкоформатной печати для рекламных агентств",
+  "name": "Sol Print — Калькулятор для РА",
+  "short_name": "Sol Print Опт",
+  "description": "Широкоформатная печать — прайс для рекламных агентств",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
