@@ -8,11 +8,12 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 
-    <!-- Иконки -->
+    <!-- Иконки для вкладки и PWA -->
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="apple-touch-icon" href="icon-192.png">
 
+    <!-- Для Safari на iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Sol Print">
@@ -27,6 +28,7 @@
             --accent: #c1121f;
             --bg: #ffffff;
             --dark: #1a1a1a;
+            --light-gray: #f8f9fa;
             --border: #dee2e6;
         }
         * {
@@ -35,7 +37,8 @@
             padding: 0;
         }
         body {
-            font-family: 'Calibri', 'Segoe UI', sans-serif;
+            font-family: 'Calibri', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-weight: 400;
             background: var(--bg);
             display: flex;
             justify-content: center;
@@ -92,7 +95,7 @@
             padding: 11px 14px;
             border: 2px solid var(--border);
             border-radius: 10px;
-            font-family: 'Calibri', 'Segoe UI', sans-serif;
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
             font-weight: 400;
             font-size: 15px;
             background: #fff;
@@ -216,13 +219,14 @@
             color: #fff;
             border: none;
             border-radius: 12px;
-            font-family: 'Calibri', 'Segoe UI', sans-serif;
+            font-family: 'Calibri', 'Segoe UI', system-ui, sans-serif;
             font-weight: 700;
             font-size: 17px;
             cursor: pointer;
             transition: 0.3s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-save:hover {
             background: var(--accent);
@@ -241,7 +245,7 @@
             margin: 12px 0;
         }
 
-        /* ===== КНОПКА УСТАНОВКИ PWA ===== */
+        /* ===== PWA — МАЛЕНЬКАЯ ССЫЛКА ВНИЗУ ===== */
         .pwa-install {
             text-align: center;
             margin-top: 20px;
@@ -250,25 +254,20 @@
         }
         .pwa-install a {
             display: inline-block;
-            font-size: 13px;
-            color: var(--primary);
+            font-size: 12px;
+            color: #999;
             text-decoration: none;
-            cursor: pointer;
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--primary);
             transition: 0.2s;
-            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 20px;
         }
         .pwa-install a:hover {
-            background: var(--primary);
-            color: #fff;
+            color: var(--primary);
+            background: rgba(230, 57, 70, 0.08);
         }
-        .pwa-install a.installed {
-            color: #999;
-            border-color: #ccc;
-            pointer-events: none;
-            opacity: 0.5;
+        .pwa-install a.hidden {
+            display: none;
         }
 
         @media (max-width: 480px) {
@@ -298,7 +297,6 @@
             <p class="subtitle">Широкоформатная печать — Прайс для РА</p>
         </div>
 
-        <!-- ===== ВСЁ ТЕЛО КАЛЬКУЛЯТОРА (БЕЗ ИЗМЕНЕНИЙ) ===== -->
         <div class="form-group">
             <label>Материал</label>
             <select id="material" onchange="updateUI()">
@@ -389,10 +387,10 @@
             <button class="btn-save" onclick="saveToPDF()">Сохранить расчёт в PDF</button>
         </div>
 
-        <!-- ===== КНОПКА УСТАНОВКИ PWA ===== -->
+        <!-- ===== PWA — МАЛЕНЬКАЯ ССЫЛКА ВНИЗУ ===== -->
         <div class="pwa-install">
-            <a id="pwaInstallBtn" onclick="installPWA()">
-                📲 Установить приложение
+            <a id="pwaInstallLink" class="hidden" onclick="installPWA()">
+                📲 Установить как приложение
             </a>
         </div>
     </div>
@@ -400,65 +398,29 @@
     <script>
         // ===== PWA УСТАНОВКА =====
         let deferredPrompt;
-        let isInstalled = false;
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('pwaInstallBtn').style.display = 'inline-block';
-        });
-
-        window.addEventListener('appinstalled', () => {
-            isInstalled = true;
-            const btn = document.getElementById('pwaInstallBtn');
-            btn.textContent = '✅ Приложение установлено';
-            btn.classList.add('installed');
+            document.getElementById('pwaInstallLink').classList.remove('hidden');
         });
 
         function installPWA() {
-            if (isInstalled) return;
-
             if (deferredPrompt) {
-                // Показываем нативный диалог установки
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((result) => {
                     if (result.outcome === 'accepted') {
                         console.log('✅ PWA установлено');
-                    } else {
-                        console.log('❌ Установка отклонена');
+                        document.getElementById('pwaInstallLink').classList.add('hidden');
                     }
                     deferredPrompt = null;
                 });
-            } else {
-                // Если beforeinstallprompt не сработал — показываем инструкцию
-                showInstallInstructions();
             }
         }
 
-        function showInstallInstructions() {
-            const isAndroid = /android/i.test(navigator.userAgent);
-            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
-            let message = '📲 Как установить приложение:\n\n';
-
-            if (isAndroid) {
-                message += '• Откройте меню Chrome (⋮)\n';
-                message += '• Нажмите «Установить приложение»\n';
-                message += '• Подтвердите установку\n\n';
-                message += '✅ После установки иконка появится на рабочем столе.';
-            } else if (isIOS) {
-                message += '• Нажмите кнопку «Поделиться» (⬆️)\n';
-                message += '• Выберите «На экран «Домой»»\n';
-                message += '• Нажмите «Добавить»\n\n';
-                message += '✅ После этого иконка появится на рабочем столе.';
-            } else {
-                message += '• Нажмите на иконку установки в адресной строке (справа)\n';
-                message += '• Выберите «Установить»\n\n';
-                message += '✅ После установки приложение появится в меню Пуск.';
-            }
-
-            alert(message);
-        }
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('pwaInstallLink').classList.add('hidden');
+        });
 
         // ===== ОСНОВНОЙ КОД =====
         let fontBase64 = null;
@@ -484,11 +446,6 @@
             loadFont();
             updateUI();
             calculate();
-
-            // Если PWA уже установлена — скрываем кнопку
-            if (window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('pwaInstallBtn').style.display = 'none';
-            }
         };
 
         function updateUI() {
