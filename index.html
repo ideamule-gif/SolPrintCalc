@@ -2,10 +2,26 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sol Print — Калькулятор</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Иконки для вкладки и PWA -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Для Safari на iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sol Print">
+    <meta name="theme-color" content="#e63946">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
     </script>
+
     <style>
         :root {
             --primary: #e63946;
@@ -29,6 +45,7 @@
             padding: 20px;
             color: var(--dark);
             line-height: 1.5;
+            -webkit-tap-highlight-color: transparent;
         }
         .calc-container {
             background: #fff;
@@ -84,6 +101,8 @@
             background: #fff;
             transition: 0.2s;
             color: var(--dark);
+            -webkit-appearance: none;
+            appearance: none;
         }
         select:focus,
         input:focus {
@@ -207,6 +226,7 @@
             transition: 0.3s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-save:hover {
             background: var(--accent);
@@ -249,14 +269,25 @@
         .pwa-install a.hidden {
             display: none;
         }
+
+        @media (max-width: 480px) {
+            .calc-container {
+                padding: 15px;
+            }
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+            #totalPrice {
+                font-size: 30px;
+            }
+            .btn-save {
+                width: 100%;
+                font-size: 15px;
+                padding: 14px;
+            }
+        }
     </style>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖨️</text></svg>">
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Sol Print">
-    <meta name="theme-color" content="#e63946">
 </head>
 <body>
 
@@ -365,7 +396,7 @@
     </div>
 
     <script>
-        // ===== PWA УСТАНОВКА (маленькая ссылка внизу) =====
+        // ===== PWA УСТАНОВКА =====
         let deferredPrompt;
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -379,7 +410,7 @@
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((result) => {
                     if (result.outcome === 'accepted') {
-                        console.log('PWA установлено');
+                        console.log('✅ PWA установлено');
                         document.getElementById('pwaInstallLink').classList.add('hidden');
                     }
                     deferredPrompt = null;
@@ -392,10 +423,8 @@
         });
 
         // ===== ОСНОВНОЙ КОД =====
-        // Глобальная переменная для хранения загруженного шрифта
         let fontBase64 = null;
 
-        // Загружаем шрифт при старте
         async function loadFont() {
             try {
                 const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf';
@@ -407,9 +436,9 @@
                     binary += String.fromCharCode(bytes[i]);
                 }
                 fontBase64 = btoa(binary);
-                console.log('Шрифт загружен успешно');
+                console.log('✅ Шрифт загружен');
             } catch (error) {
-                console.error('Ошибка загрузки шрифта:', error);
+                console.error('❌ Ошибка загрузки шрифта:', error);
             }
         }
 
@@ -553,14 +582,13 @@
             const data = calculate();
 
             if (!fontBase64) {
-                alert('Шрифт ещё загружается, попробуйте через секунду');
+                alert('⏳ Шрифт ещё загружается, попробуйте через секунду');
                 return;
             }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
-            // Добавляем шрифт
             doc.addFileToVFS('Roboto-Regular.ttf', fontBase64);
             doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
             doc.setFont('Roboto');
@@ -568,7 +596,6 @@
             const left = 20;
             let y = 20;
 
-            // Заголовок
             doc.setFontSize(24);
             doc.setTextColor(230, 57, 70);
             doc.text('SOL PRINT', left, y);
@@ -578,13 +605,11 @@
             doc.text('Широкоформатная печать — Прайс для РА', left, y + 7);
             y += 18;
 
-            // Линия
             doc.setDrawColor(230, 57, 70);
             doc.setLineWidth(0.5);
             doc.line(left, y, 190, y);
             y += 10;
 
-            // Данные
             doc.setFontSize(12);
             doc.setTextColor(50, 50, 50);
 
@@ -602,7 +627,6 @@
             addLine('Количество', data.qty + ' шт.');
             y += 5;
 
-            // Доп. услуги
             doc.setFontSize(13);
             doc.text('Дополнительные услуги:', left, y);
             y += 8;
@@ -621,18 +645,15 @@
             }
             y += 12;
 
-            // Линия
             doc.setDrawColor(230, 57, 70);
             doc.line(left, y, 190, y);
             y += 10;
 
-            // Итого
             doc.setFontSize(20);
             doc.setTextColor(200, 20, 30);
             doc.text('ИТОГО: ' + data.final.toLocaleString('ru-RU') + ' РУБ.', left, y);
             y += 15;
 
-            // Футер
             doc.setFontSize(8);
             doc.setTextColor(150, 150, 150);
             doc.text('Сгенерировано Sol Print Online Calculator', left, 280);
