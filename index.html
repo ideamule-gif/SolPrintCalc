@@ -642,18 +642,5 @@
         }
     </script>
 
-    <script>
-        // Регистрация Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/SolPrintCalc/sw.js')
-                .then(registration => {
-                    console.log('✅ Service Worker зарегистрирован');
-                })
-                .catch(error => {
-                    console.log('❌ Ошибка регистрации Service Worker:', error);
-                });
-        }
-    </script>
-
 </body>
 </html>
